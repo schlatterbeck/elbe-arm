@@ -20,9 +20,7 @@
       <msdoshd>
 	<name>sdcard.img</name>
 	<size>1900MiB</size>
-        <binary offset="8" blocksize="1024">
-          u-boot-sunxi-with-spl-bananapi-m2+edu.bin
-        </binary>
+        <binary offset="8" blocksize="1024">u-boot-sunxi-with-spl-bananapi-m2+edu.bin</binary>
 	<partition>
 	    <size>20MiB</size>
 	    <label>boot</label>
