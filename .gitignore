@@ -1,6 +1,7 @@
 *.dtb
 *.bin
 *.tbz
+*.scr
 uImage*
 elbe-sunxi-payload.xml
 archivedir

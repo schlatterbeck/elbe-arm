@@ -20,7 +20,7 @@
       <msdoshd>
 	<name>sdcard.img</name>
 	<size>1900MiB</size>
-        <binary offset="8" blocksize="1024">u-boot-sunxi-with-spl-bananapi-m2+edu.bin</binary>
+        <binary offset="8" blocksize="1024">u-boot.bin</binary>
 	<partition>
 	    <size>20MiB</size>
 	    <label>boot</label>
@@ -37,6 +37,8 @@
     <finetuning>
       <rm>/var/cache/apt/archives/*.deb</rm>
       <rm>/etc/udev/rules.d/70-persistent-net.rules</rm>
+      <t2p_mv path="/boot/u-boot.bin">u-boot.bin</t2p_mv>
+      <rm>/boot/u-boot.bin</rm>
     </finetuning>
     <xi:include href="include/pkglist.xml"/>
   </target>
