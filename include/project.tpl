@@ -14,13 +14,15 @@
         <binary>
           http://debian.linutronix.de/elbe-testing stretch main
         </binary>
+        <key>
+          http://debian.linutronix.de/elbe/elbe-repo.pub
+        </key>
       </url>
       <url>
         <binary>
           http://debian.linutronix.de/elbe-common stretch main
         </binary>
+        <key>
+          http://debian.linutronix.de/elbe/elbe-repo.pub
+        </key>
       </url>
-    </url-list>
-  </mirror>
-  <suite>stretch</suite>
-</project>

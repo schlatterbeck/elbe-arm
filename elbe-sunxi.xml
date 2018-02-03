@@ -37,8 +37,8 @@
     <finetuning>
       <rm>/var/cache/apt/archives/*.deb</rm>
       <rm>/etc/udev/rules.d/70-persistent-net.rules</rm>
-      <t2p_mv path="/boot/u-boot.bin">u-boot.bin</t2p_mv>
-      <rm>/boot/u-boot.bin</rm>
+      <t2p_mv path="/u-boot.bin">u-boot.bin</t2p_mv>
+      <xi:include href="include/copy-dtb.xml"/>
     </finetuning>
     <xi:include href="include/pkglist.xml"/>
   </target>

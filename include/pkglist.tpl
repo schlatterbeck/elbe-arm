@@ -22,4 +22,3 @@
   <pkg>wget</pkg>
   <pkg>bluez</pkg>
   <pkg>host</pkg>
-</pkg-list>

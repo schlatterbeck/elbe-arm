@@ -2,6 +2,12 @@
 *.bin
 *.tbz
 *.scr
+.*.stamp
 uImage*
 elbe-sunxi-payload.xml
 archivedir
+debian-dist
+boot.cmd
+elbe-build-*
+gpg.genscript
+gpg
