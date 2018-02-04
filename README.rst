@@ -59,6 +59,11 @@ environment-variables or specified as ``KERNEL`` and ``BOOTLOADER``
 parameters during ``make`` invocation if the defaults at the top of the
 ``Makefile`` don't suit you.
 
+You currently have to edit the files ``include/initvm.xml`` and
+``include/project.tpl`` to point to your preferred debian mirror: Just
+replace ``bee.priv.zoo`` with the debian mirror of your choice. For
+speed reasons a local mirror is a good idea.
+
 Note that we currently use a single kernel for all boards. During kernel
 build an existing kernel configuration in a ``.config`` file is
 overwritten with the checked-in kernel-config file. Also a ``distclean``
@@ -105,6 +110,15 @@ the debian maintainer settings for the built debian source package::
 
 These are used for signing the packages and are also used in the
 generated temporary GPG key.
+
+Invocation
+----------
+
+When everything is set up you typically invoke the command ::
+
+  make TARGET=A20-OLinuXino-Lime
+
+or you use a different target.
 
 Bugs
 ----
