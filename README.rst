@@ -32,9 +32,11 @@ You need to put the ELBE repositories into your
 The Linux kernel and the U-Boot bootloader are built on the local
 machine (not inside the ELBE VM), maybe at some later time I'll support
 building natively on ELBE. For this reason you need to install an ARMHF
-cross-compiler which is provided by debian::
+cross-compiler which is provided by debian. You also need to install the
+jinja2 templating tools as we're making heavy use of templating for
+building .xml and various other files::
 
-  apt-get install gcc-arm-linux-gnueabihf
+  apt-get install gcc-arm-linux-gnueabihf python3-jinja2
 
 You probably need some more tools installed via debian, currently I've
 not tracked all the packages you need.
