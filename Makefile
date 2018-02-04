@@ -46,6 +46,8 @@ ifeq (${TARGET},A20-OLinuXino_MICRO)
 DTB:=sun7i-a20-olinuxino-micro
 else ifeq (${TARGET},A20-OLinuXino_MICRO-eMMC)
 DTB:=sun7i-a20-olinuxino-micro-emmc
+else ifeq (${TARGET},A20-OLinuXino-Lime)
+DTB:=sun7i-a20-olinuxino-lime
 else ifeq (${TARGET},A20-OLinuXino-Lime2)
 DTB:=sun7i-a20-olinuxino-lime2
 else ifeq (${TARGET},A20-OLinuXino-Lime2-eMMC)
