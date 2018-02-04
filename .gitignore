@@ -9,5 +9,6 @@ archivedir
 debian-dist
 boot.cmd
 elbe-build-*
-gpg.genscript
+gpg.cmd
 gpg
+elbe-sunxi.xml
