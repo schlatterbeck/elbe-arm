@@ -57,12 +57,16 @@ enough with Git to do this.
 The locations of these checkouts need to be either set as
 environment-variables or specified as ``KERNEL`` and ``BOOTLOADER``
 parameters during ``make`` invocation if the defaults at the top of the
-``Makefile`` don't suit you.
+``Makefile`` don't suit you. See the top of the ``Makefile`` for all
+variables you can
 
-You currently have to edit the files ``include/initvm.xml`` and
-``include/project.tpl`` to point to your preferred debian mirror: Just
-replace ``bee.priv.zoo`` with the debian mirror of your choice. For
-speed reasons a local mirror is a good idea.
+- override on the command-line of ``make`` with ``VAR=value``
+- or specify in the shell environment
+
+One of the variables to override is the ``DEBIAN_MIRROR`` variable,
+possibly also the ``DEBIAN_MIRROR_PROTOCOL`` if you want to use
+``https`` instead of ``http``.  For speed reasons a local mirror is a
+good idea.
 
 Note that we currently use a single kernel for all boards. During kernel
 build an existing kernel configuration in a ``.config`` file is
@@ -76,8 +80,9 @@ dependency in the Makefile on the board names is currently the name of
 the DTB-File to use for the board: The DTB is set in the Makefile
 depending on the target board. The board name is specified with the
 TARGET environment variable or ``Makefile`` parameter. Since U-Boot also
-contains a mechanism for computing the name of the DTB, we may use the
-same mechanism in the future.
+contains a mechanism for computing the name of the DTB, we use the
+same mechanism. In case of some boards (where U-Boot gets it wrong) we
+can override the setting.
 
 If you need to use your own DTB-File, you should make sure the source is
 in the used kernel sources and it is built during kernel build, because
