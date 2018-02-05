@@ -107,8 +107,7 @@ MKDIR:=mkdir -p
 TAR:=/bin/tar
 MKIMAGE:=${BOOTLOADER}/tools/mkimage
 
-elbe: elbe-sunxi-payload.xml .webserver.stamp \
-    include/pkglist.xml include/copy-dtb.xml include/project.xml
+elbe: elbe-sunxi-payload.xml .webserver.stamp
 	elbe initvm submit --directory $(ELBE_DIR) elbe-sunxi-payload.xml
 
 elbe-sunxi-payload.xml: elbe-sunxi.xml archive.tbz
@@ -155,7 +154,7 @@ u-boot-sunxi-with-spl-${TARGET}.bin:
 	make -C ${KERNEL} deb-pkg
 	touch .kernel-build.stamp
 
-.kernel-package.stamp ${DEBPOOL}: .kernel-build.stamp gpg
+.kernel-package.stamp ${DEBPOOL}: .kernel-build.stamp .gpg.stamp
 	${RM} -r debian-dist
 	${MKDIR} ${DEBPOOL} ${DEBSRC} ${DEBBIN}
 	${CP} gpg/pubring.asc debian-dist/pubring.asc
@@ -172,7 +171,7 @@ u-boot-sunxi-with-spl-${TARGET}.bin:
 	touch .kernel-package.stamp
 
 # Note: Need to create Release file *after* signing deb packages
-.sign-debs.stamp: .kernel-package.stamp gpg
+.sign-debs.stamp: .kernel-package.stamp .gpg.stamp
 	dpkg-sig -g "--homedir gpg" --sign builder debian-dist/pool/linux-*deb
 	cd debian-dist && dpkg-scanpackages -a ${DEBARCH} pool | gzip -9 - \
 	    > dists/${DEBIANSUITE}/main/binary-${DEBARCH}/Packages.gz
@@ -182,12 +181,6 @@ u-boot-sunxi-with-spl-${TARGET}.bin:
 	gpg --homedir gpg --yes --armor --output ${DEBDST}/Release.gpg \
 	    --detach-sig ${DEBDST}/Release
 	touch .sign-debs.stamp
-
-# A finetuning rule to copy correct dtb to /boot
-# Note that this is marked a PHONY target to alway rebuild (DTB might
-# have changed)
-include/copy-dtb.xml:
-	echo '<cp path="/usr/lib/linux-image-${KERNELRELEASE}/${DTB}.dtb">/boot/linux.dtb</cp>' > $@
 
 # Start local webserver for repository generated above
 .webserver.stamp: .sign-debs.stamp
@@ -210,26 +203,29 @@ GPG_KEY=$(shell gpg --list-secret-keys --homedir gpg | head -4 | tail -1)
 # Oh, yes, this is really a hack. Note that all gpg commands nowaday
 # start a gpg agent and creation of a key in batch mode fails if an
 # agent is running.
-gpg: gpg.cmd
+.gpg.stamp gpg: gpg.cmd
 	${RM} -r gpg
 	${MKDIR} gpg
 	chmod go-rwx gpg
 	killall gpg-agent
 	gpg --homedir ./gpg --batch --generate-key gpg.cmd
 	gpg --homedir ./gpg --export --armor > gpg/pubring.asc
+	touch .gpg.stamp
 
 clean:
 	if [ -f .webserver.stamp ] ; then  \
 	    kill $$(cat .webserver.stamp); \
 	    ${RM} .webserver.stamp;        \
 	fi
-	${RM} archive.tbz elbe-sunxi-payload.xml boot.scr \
-            include/project.xml include/copy-dtb.xml
+	${RM} archive.tbz elbe-sunxi-payload.xml boot.scr boot.cmd  \
+            elbe-sunxi.xml boot.tmp elbe-sunxi.tmp gpg.tmp
+	${RM} -r archivedir
 
 clobber: clean
-	${RM} -r ${DEBPOOL}
+	${RM} -r ${DEBPOOL} gpg debian-dist
 	${RM} .kernel-package.stamp .sign-debs.stamp \
-	u-boot-sunxi-with-spl-*.bin include/pkglist.xml
+	u-boot-sunxi-with-spl-*.bin gpg.cmd
 
-.PHONY: clean clobber show-kernel-version include/copy-dtb.xml \
-    show-dtb FORCE
+.PHONY: clean clobber show-kernel-version show-dtb FORCE
+.PRECIOUS: .sign-debs.stamp .kernel-package.stamp .kernel-build.stamp \
+    gpg gpg.cmd .webserver.stamp
