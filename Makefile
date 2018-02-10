@@ -29,15 +29,60 @@ DEBEMAIL:=anonymous@example.com
 endif
 export DEBEMAIL
 
-ifeq (${DEBIAN_MIRROR},)
-DEBIAN_MIRROR:=ftp.debian.org
+ifeq (${DEBIAN_MIRROR_HOST},)
+DEBIAN_MIRROR_HOST:=ftp.debian.org
 endif
-export DEBIAN_MIRROR
+export DEBIAN_MIRROR_HOST
+
+ifeq (${DEBIAN_MIRROR_PATH},)
+DEBIAN_MIRROR_PATH:=/debian
+endif
+export DEBIAN_MIRROR_PATH
 
 ifeq (${DEBIAN_MIRROR_PROTOCOL},)
 DEBIAN_MIRROR_PROTOCOL:=http
 endif
 export DEBIAN_MIRROR_PROTOCOL
+
+ifeq (${DEBIAN_SECURITY_MIRROR_HOST},)
+DEBIAN_SECURITY_MIRROR_HOST:=security.debian.org
+endif
+export DEBIAN_SECURITY_MIRROR_HOST
+
+ifeq (${DEBIAN_SECURITY_MIRROR_PATH},)
+DEBIAN_SECURITY_MIRROR_PATH:=security.debian.org
+endif
+export DEBIAN_SECURITY_MIRROR_PATH
+
+ifeq (${DEBIAN_SECURITY_MIRROR_PROTOCOL},)
+DEBIAN_SECURITY_MIRROR_PROTOCOL:=${DEBIAN_MIRROR_PROTOCOL}
+endif
+export DEBIAN_SECURITY_MIRROR_PROTOCOL
+
+ifeq (${DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX},)
+DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX:=/updates
+endif
+export DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX
+
+ifeq (${DEBIAN_VOLATILE_MIRROR_HOST},)
+DEBIAN_VOLATILE_MIRROR_HOST:=security.debian.org
+endif
+export DEBIAN_VOLATILE_MIRROR_HOST
+
+ifeq (${DEBIAN_VOLATILE_MIRROR_PATH},)
+DEBIAN_VOLATILE_MIRROR_PATH:=security.debian.org
+endif
+export DEBIAN_VOLATILE_MIRROR_PATH
+
+ifeq (${DEBIAN_VOLATILE_MIRROR_PROTOCOL},)
+DEBIAN_VOLATILE_MIRROR_PROTOCOL:=${DEBIAN_MIRROR_PROTOCOL}
+endif
+export DEBIAN_VOLATILE_MIRROR_PROTOCOL
+
+ifeq (${DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX},)
+DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX:=-updates
+endif
+export DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX
 
 ifeq (${DEBIANSUITE},)
 DEBIANSUITE:=stretch
@@ -61,6 +106,49 @@ DTB:=$(shell grep CONFIG_DEFAULT_DEVICE_TREE ${DTBPATH} | cut -d'"' -f2)
 endif # TARGET check
 endif # DTB
 export DTB
+
+DTBCPU:=$(shell echo ${DTB} | cut -d- -f1)
+
+ifeq (${CROSS_COMPILE},)
+ifeq (${DTBCPU},bcm2835)
+CROSS_COMPILE:=arm-linux-gnueabi-
+else
+CROSS_COMPILE:=arm-linux-gnueabihf-
+endif
+endif
+export CROSS_COMPILE
+
+ifeq (${DEBARCH},)
+ifeq (${DTBCPU},bcm2835)
+DEBARCH:=armel
+else
+DEBARCH:=armhf
+endif
+endif
+export DEBARCH
+
+ifeq (${HOST_NAME},)
+HOST_NAME=${DTBCPU}
+endif
+export HOST_NAME
+
+ifeq (${PROJECT},)
+PROJECT=${DTBCPU}
+endif
+export PROJECT
+
+ifeq (${UBOOTBIN},)
+ifeq ($(findstring sun,${DTBCPU}),sun)
+UBOOTBIN=u-boot-sunxi-with-spl.bin
+else
+UBOOTBIN=u-boot.bin
+endif
+endif
+
+# ARCH is used by Linux kernel, we compute this from the given
+# crosscompiler for the target.
+ARCH:=$(shell echo ${CROSS_COMPILE} | cut -d- -f1)
+export ARCH
 
 # For serving a dynamically-generated debian repo we start a local
 # web-server (python SimpleHTTPServer) on the given port
@@ -87,14 +175,6 @@ KERNELREV=$(shell cat ${KERNEL}/.version)
 KV=${KERNELRELEASE}_${KERNELRELEASE}
 KR=${KERNELREV}
 
-# ARCH is used by Linux kernel, we may compute this in the future from
-# the given target. Same for CROSS_COMPILE and DEBARCH settings.
-ARCH:=arm
-export ARCH
-CROSS_COMPILE=arm-linux-gnueabihf-
-export CROSS_COMPILE
-DEBARCH:=armhf
-export DEBARCH
 DEBPOOL:=debian-dist/pool
 DEBDST:=debian-dist/dists/${DEBIANSUITE}
 DEBSRC:=${DEBDST}/main/source
@@ -107,12 +187,12 @@ MKDIR:=mkdir -p
 TAR:=/bin/tar
 MKIMAGE:=${BOOTLOADER}/tools/mkimage
 
-elbe: elbe-sunxi-payload.xml .webserver.stamp
-	elbe initvm submit --directory $(ELBE_DIR) elbe-sunxi-payload.xml
+elbe: elbe-payload.xml .webserver.stamp
+	elbe initvm submit --directory $(ELBE_DIR) elbe-payload.xml
 
-elbe-sunxi-payload.xml: elbe-sunxi.xml archive.tbz
-	${CP} elbe-sunxi.xml elbe-sunxi-payload.xml
-	elbe chg_archive elbe-sunxi-payload.xml archive.tbz
+elbe-payload.xml: elbe.xml archive.tbz
+	${CP} elbe.xml elbe-payload.xml
+	elbe chg_archive elbe-payload.xml archive.tbz
 
 # The following 4 rules always force the generation of the .tmp file
 # but the .xml file is only generated (timestamp updated) if it has
@@ -130,10 +210,10 @@ FORCE:
 %.cmd: %.tmp
 	./move_if_change $< $@
 
-archive.tbz: u-boot-sunxi-with-spl-${TARGET}.bin boot.scr
+archive.tbz: u-boot-${TARGET}.bin boot.scr
 	${RM} -r archivedir
 	${MKDIR} archivedir/boot
-	${CP} u-boot-sunxi-with-spl-${TARGET}.bin archivedir/u-boot.bin
+	${CP} u-boot-${TARGET}.bin archivedir/u-boot.bin
 	${CP} boot.cmd archivedir/boot
 	${CP} boot.scr archivedir/boot
 	cd archivedir && fakeroot ${TAR} cvjf ../archive.tbz .
@@ -141,21 +221,22 @@ archive.tbz: u-boot-sunxi-with-spl-${TARGET}.bin boot.scr
 boot.scr: boot.cmd
 	$(MKIMAGE) -T script -C none -A arm -n 'bootscript' -d boot.cmd boot.scr
 
-u-boot-sunxi-with-spl-${TARGET}.bin:
+u-boot-${TARGET}.bin:
 	make -C ${BOOTLOADER} clean
 	make -C ${BOOTLOADER} ${TARGET}_config
 	make -C ${BOOTLOADER}
-	${CP} ${BOOTLOADER}/u-boot-sunxi-with-spl.bin $@
+	${CP} ${BOOTLOADER}/${UBOOTBIN} $@
 
-.kernel-build.stamp: kernel-config
+.kernel-build.${DEBARCH}.stamp: sunxi-config
 	make -C ${KERNEL} distclean
-	${CP} kernel-config ${KERNEL}/.config
+	${CP} sunxi-config ${KERNEL}/.config
 	make -C ${KERNEL} oldconfig
 	make -C ${KERNEL} deb-pkg
-	touch .kernel-build.stamp
+	touch .kernel-build.${DEBARCH}.stamp
 
-.kernel-package.stamp ${DEBPOOL}: .kernel-build.stamp .gpg.stamp
-	${RM} -r debian-dist
+.kernel-package.${DEBARCH}.stamp ${DEBPOOL}: .kernel-build.${DEBARCH}.stamp \
+    .gpg.stamp
+	${RM} -r ${DEBSRC} ${DEBBIN}
 	${MKDIR} ${DEBPOOL} ${DEBSRC} ${DEBBIN}
 	${CP} gpg/pubring.asc debian-dist/pubring.asc
 	${CP} ${KERNEL}/../linux-${KV}.orig.tar.gz                            \
@@ -168,11 +249,12 @@ u-boot-sunxi-with-spl-${TARGET}.bin:
 	cd debian-dist && dpkg-scansources pool . | gzip -9 - \
 	    > dists/${DEBIANSUITE}/main/source/Sources.gz
 	zcat ${DEBSRC}/Sources.gz > ${DEBSRC}/Sources
-	touch .kernel-package.stamp
+	touch .kernel-package.${DEBARCH}.stamp
 
 # Note: Need to create Release file *after* signing deb packages
-.sign-debs.stamp: .kernel-package.stamp .gpg.stamp
-	dpkg-sig -g "--homedir gpg" --sign builder debian-dist/pool/linux-*deb
+.sign-debs.${DEBARCH}.stamp: .kernel-package.${DEBARCH}.stamp .gpg.stamp
+	dpkg-sig -g "--homedir gpg" --sign builder \
+	    debian-dist/pool/linux-*_${DEBARCH}.deb
 	cd debian-dist && dpkg-scanpackages -a ${DEBARCH} pool | gzip -9 - \
 	    > dists/${DEBIANSUITE}/main/binary-${DEBARCH}/Packages.gz
 	zcat ${DEBBIN}/Packages.gz > ${DEBBIN}/Packages
@@ -180,10 +262,10 @@ u-boot-sunxi-with-spl-${TARGET}.bin:
             > Release
 	gpg --homedir gpg --yes --armor --output ${DEBDST}/Release.gpg \
 	    --detach-sig ${DEBDST}/Release
-	touch .sign-debs.stamp
+	touch .sign-debs.${DEBARCH}.stamp
 
 # Start local webserver for repository generated above
-.webserver.stamp: .sign-debs.stamp
+.webserver.stamp: .sign-debs.${DEBARCH}.stamp
 	if [ -f .webserver.stamp ] ; then  \
 	    kill $$(cat .webserver.stamp); \
 	    ${RM} .webserver.stamp;        \
@@ -197,6 +279,11 @@ show-kernel-version:
 
 show-dtb:
 	@echo ${DTB}
+
+show-env:
+	@echo TARGET=${TARGET} CROSS_COMPILE=${CROSS_COMPILE} ARCH=${ARCH}
+	@echo DEBARCH=${DEBARCH} DTBCPU=${DTBCPU}
+	@echo HOST_NAME=${HOST_NAME} PROJECT=${PROJECT}
 
 GPG_KEY=$(shell gpg --list-secret-keys --homedir gpg | head -4 | tail -1)
 
@@ -217,15 +304,15 @@ clean:
 	    kill $$(cat .webserver.stamp); \
 	    ${RM} .webserver.stamp;        \
 	fi
-	${RM} archive.tbz elbe-sunxi-payload.xml boot.scr boot.cmd  \
-            elbe-sunxi.xml boot.tmp elbe-sunxi.tmp gpg.tmp
+	${RM} archive.tbz elbe-payload.xml boot.scr boot.cmd  \
+            elbe.xml boot.tmp elbe.tmp gpg.tmp
 	${RM} -r archivedir
 
 clobber: clean
 	${RM} -r ${DEBPOOL} gpg debian-dist
-	${RM} .kernel-package.stamp .sign-debs.stamp \
-	u-boot-sunxi-with-spl-*.bin gpg.cmd
+	${RM} .kernel-package.*.stamp .sign-debs.*.stamp \
+	u-boot-*.bin gpg.cmd .kernel-build.*.stamp
 
-.PHONY: clean clobber show-kernel-version show-dtb FORCE
-.PRECIOUS: .sign-debs.stamp .kernel-package.stamp .kernel-build.stamp \
-    gpg gpg.cmd .webserver.stamp
+.PHONY: clean clobber show-kernel-version show-dtb show-env FORCE
+.PRECIOUS: .sign-debs.${DEBARCH}.stamp .kernel-package.${DEBARCH}.stamp \
+    .kernel-build.${DEBARCH}.stamp gpg gpg.cmd .webserver.stamp

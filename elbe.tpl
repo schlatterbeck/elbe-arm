@@ -42,17 +42,27 @@
     </portforwarding>
   </initvm>
   <project>
-    <name>elbe-sunxi</name>
+    <name>{{PROJECT}}</name>
     <version>1.0</version>
     <description>
       For Olimex and Banana-Pi Boards
     </description>
     <buildtype>{{DEBARCH}}</buildtype>
     <mirror>
-      <primary_host>{{DEBIAN_MIRROR}}</primary_host>
-      <primary_path>/debian</primary_path>
+      <primary_host>{{DEBIAN_MIRROR_HOST}}</primary_host>
+      <primary_path>{{DEBIAN_MIRROR_PATH}}</primary_path>
       <primary_proto>{{DEBIAN_MIRROR_PROTOCOL}}</primary_proto>
       <url-list>
+        <url>
+          <binary>
+            {{DEBIAN_SECURITY_MIRROR_PROTOCOL}}://{{DEBIAN_SECURITY_MIRROR_HOST}}{{DEBIAN_SECURITY_MIRROR_PATH}} {{DEBIANSUITE}}{{DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX}} main
+          </binary>
+        </url>
+        <url>
+          <binary>
+            {{DEBIAN_VOLATILE_MIRROR_PROTOCOL}}://{{DEBIAN_VOLATILE_MIRROR_HOST}}{{DEBIAN_VOLATILE_MIRROR_PATH}} {{DEBIANSUITE}}{{DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX}} main
+          </binary>
+        </url>
         <url>
           <binary>
             http://debian.linutronix.de/elbe-testing {{DEBIANSUITE}} main
@@ -83,7 +93,7 @@
     <suite>{{DEBIANSUITE}}</suite>
   </project>
   <target>
-    <hostname>sunxi</hostname>
+    <hostname>{{HOST_NAME}}</hostname>
     <domain>local</domain>
     <passwd>xyzzy</passwd>
     <console>ttyAMA0,115200</console>
