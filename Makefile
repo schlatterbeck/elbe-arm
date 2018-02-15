@@ -92,7 +92,7 @@ export DEBIANSUITE
 # TARGET, usually specified on command line
 # e.g. for Bananapi M2+ (and -EDU variant): Sinovoip_BPI_M2_Plus
 ifeq (${TARGET},)
-TARGET:=A20-OLinuXino-Lime2
+TARGET:=A20-OLinuXino-Lime
 endif
 
 DTBPATH:=${BOOTLOADER}/configs/${TARGET}_defconfig
@@ -199,7 +199,7 @@ elbe-payload.xml: elbe.xml archive.tbz
 # changed. This prevents costly rebuilds but ensures the .xml is
 # recreated if the TARGET variable changes.
 
-%.tmp: %.tpl preprocess Makefile FORCE
+%.tmp: %.tpl preprocess Makefile .sign-debs.${DEBARCH}.stamp FORCE
 	env KERNELRELEASE=${KERNELRELEASE} ./preprocess $<
 
 FORCE:
@@ -210,7 +210,7 @@ FORCE:
 %.cmd: %.tmp
 	./move_if_change $< $@
 
-archive.tbz: u-boot-${TARGET}.bin boot.scr
+archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd
 	${RM} -r archivedir
 	${MKDIR} archivedir/boot
 	${CP} u-boot-${TARGET}.bin archivedir/u-boot.bin
@@ -227,9 +227,9 @@ u-boot-${TARGET}.bin:
 	make -C ${BOOTLOADER}
 	${CP} ${BOOTLOADER}/${UBOOTBIN} $@
 
-.kernel-build.${DEBARCH}.stamp: sunxi-config
+.kernel-build.${DEBARCH}.stamp: config-sunxi
 	make -C ${KERNEL} distclean
-	${CP} sunxi-config ${KERNEL}/.config
+	${CP} config-sunxi ${KERNEL}/.config
 	make -C ${KERNEL} oldconfig
 	make -C ${KERNEL} deb-pkg
 	touch .kernel-build.${DEBARCH}.stamp
