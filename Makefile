@@ -210,12 +210,13 @@ FORCE:
 %.cmd: %.tmp
 	./move_if_change $< $@
 
-archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd
+archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd etc/network/interfaces
 	${RM} -r archivedir
 	${MKDIR} archivedir/boot
 	${CP} u-boot-${TARGET}.bin archivedir/u-boot.bin
 	${CP} boot.cmd archivedir/boot
 	${CP} boot.scr archivedir/boot
+	${CP} -a etc archivedir
 	cd archivedir && fakeroot ${TAR} cvjf ../archive.tbz .
 
 boot.scr: boot.cmd
