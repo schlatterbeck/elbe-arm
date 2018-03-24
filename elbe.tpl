@@ -182,6 +182,7 @@
       <cp path="/usr/lib/linux-image-{{KERNELRELEASE}}/{{DTB}}.dtb">/boot/linux.dtb</cp>
     </finetuning>
     <pkg-list>
+      <pkg>bash</pkg>
       <pkg>python</pkg>
       <pkg>python-dev</pkg>
       <pkg>python3</pkg>
@@ -206,6 +207,9 @@
       <pkg>bluez</pkg>
       <pkg>host</pkg>
       <pkg>linux-image-{{KERNELRELEASE}}</pkg>
+      {% for pkg in pkglist -%}
+      <pkg>{{pkg}}</pkg>
+      {% endfor %}
     </pkg-list>
   </target>
 </ns0:RootFileSystem>
