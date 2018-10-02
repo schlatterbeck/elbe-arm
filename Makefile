@@ -244,7 +244,6 @@ u-boot-${TARGET}.bin:
 	    ${KERNEL}/../linux-headers-${KV}-${KR}_${DEBARCH}.deb             \
 	    ${KERNEL}/../linux-${KV}-${KR}_${DEBARCH}.changes                 \
 	    ${KERNEL}/../linux-image-${KV}-${KR}_${DEBARCH}.deb               \
-	    ${KERNEL}/../linux-${KV}-${KR}.debian.tar.gz                      \
 	    ${KERNEL}/../linux-libc-dev_${KERNELRELEASE}-${KR}_${DEBARCH}.deb \
 	    ${KERNEL}/../linux-${KV}-${KR}.dsc ${DEBPOOL}
 	cd debian-dist && dpkg-scansources pool . | gzip -9 - \
