@@ -2,7 +2,8 @@
 # commmand line via e.g. ``make ELBE_DIR=/usr/local/lib/elbe``
 
 ifeq (${SDCARD_SIZE},)
-SDCARD_SIZE=1900MiB
+#SDCARD_SIZE=1900MiB
+SDCARD_SIZE=3724MiB
 endif
 export SDCARD_SIZE
 
@@ -94,6 +95,50 @@ export DEBIANSUITE
 ifeq (${TARGET},)
 TARGET:=A20-OLinuXino-Lime
 endif
+
+# Graphics and Framebuffer console; these are expanded in boot.tpl
+
+# Framebuffer console device
+# Note that currently the templates put the serial console *last* so
+# /dev/console will be the serial device. This is much easier to capture
+# for debugging than the frambuffer console.
+ifeq (${FB_CONSOLE},)
+ifeq (${TARGET},orangepi_zero)
+FB_CONSOLE=
+else
+FB_CONSOLE=console=tty0
+endif
+endif
+export FB_CONSOLE
+
+ifeq (${VIDEO_MODE_LINUX},)
+ifeq (${TARGET},orangepi_zero)
+VIDEO_MODE_LINUX=
+else
+VIDEO_MODE_LINUX=disp.screen0_output_mode=EDID:1280x1024p60
+endif
+endif
+export VIDEO_MODE_LINUX
+
+ifeq (${VIDEO_MODE_UBOOT},)
+ifeq (${TARGET},orangepi_zero)
+VIDEO_MODE_UBOOT=
+else
+VIDEO_MODE_UBOOT=video-mode=sunxi:1024x768-8@60,monitor=dvi,hpd=0,edid=1
+endif
+endif
+export VIDEO_MODE_UBOOT
+
+# HDMI Audio off, when on this may confuse some monitors
+# Orange-Pi Zero doesn't have HDMI at all
+ifeq (${HDMI_AUDIO},)
+ifeq (${TARGET},orangepi_zero)
+HDMI_AUDIO=
+else
+HDMI_AUDIO=hdmi.audio=EDID:0
+endif
+endif
+export HDMI_AUDIO
 
 DTBPATH:=${BOOTLOADER}/configs/${TARGET}_defconfig
 # Allow override DTB on command-line or in environment
