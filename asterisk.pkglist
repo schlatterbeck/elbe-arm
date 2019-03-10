@@ -6,4 +6,7 @@ asterisk-voicemail
 apache2
 madplay
 python-pip
+python-setuptools
 nfs-kernel-server
+man-db
+bluez

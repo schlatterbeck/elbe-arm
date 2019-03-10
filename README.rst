@@ -127,6 +127,28 @@ When everything is set up you typically invoke the command ::
 
 or you use a different target.
 
+You can specify an environment variable PKGFILES with a comma-separated
+list of files with debian package names, one on each line to add
+additional debian packages to the created image. An example package list
+file is asterisk.pkg. Alternatively you can specify PKGFILES on the
+command-line of the make invocation, e.g.::
+
+  make PKGFILES=asterisk.pkglist TARGET=A20-OLinuXino-Lime
+
+Since most boards on the market do not have a built-in MAC address, we
+now use the file in ``/etc/udev/rules.d/75-static-mac`` to set the MAC
+address of the ethernet card. The MAC address can be specified in the
+environment variable or make command-line parameter ``MAC_ADDRESS`` and
+defaults to ``02:11:22:33:44:55``. Note that you should set the second
+to last bit in the first octet in this address, this bit specifies that
+the MAC address is locally administered and not a global MAC address
+assigned by a manufacturer. Also note that the last bit of the first
+octet should be 0, if set to 1 the address is a multicast address.
+Example::
+
+  make MAC_ADDRESS=02:03:04:05:06:07 TARGET=A20-OLinuXino-Lime
+
+
 Bugs
 ----
 

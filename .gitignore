@@ -13,3 +13,4 @@ elbe-build-*
 gpg.cmd
 gpg
 elbe.xml
+fw_printenv

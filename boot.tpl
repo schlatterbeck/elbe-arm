@@ -1,6 +1,6 @@
 # Boot script for {{TARGET}}
 {{VIDEO_MODE_UBOOT}}
-setenv bootargs {{FB_CONSOLE}} console=ttyS0,115200 {{HDMI_AUDIO}} {{VIDEO_MODE_LINUX}} root=/dev/mmcblk0p2 rootwait panic=10
+setenv bootargs {{FB_CONSOLE}} console=ttyS0,115200 {{SYSTEMD_DEBUG}} {{HDMI_AUDIO}} {{VIDEO_MODE_LINUX}} root=/dev/mmcblk0p2 rootwait panic=10
 load mmc 0:1 0x43000000 linux.dtb || load mmc 0:1 0x43000000 boot/linux.dtb
 load mmc 0:1 0x42000000 vmlinuz-{{KERNELRELEASE}} || load mmc 0:1 0x42000000 boot/vmlinuz-{{KERNELRELEASE}}
 bootz 0x42000000 - 0x43000000

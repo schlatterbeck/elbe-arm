@@ -204,7 +204,6 @@
       <pkg>vlan</pkg>
       <pkg>vim-nox</pkg>
       <pkg>wget</pkg>
-      <pkg>bluez</pkg>
       <pkg>host</pkg>
       <pkg>linux-image-{{KERNELRELEASE}}</pkg>
       {% for pkg in pkglist -%}

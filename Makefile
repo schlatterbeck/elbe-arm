@@ -140,6 +140,16 @@ endif
 endif
 export HDMI_AUDIO
 
+# systemd debug, you may want to set
+# SYSTEMD_DEBUG=systemd.unit=rescue.target
+export SYSTEMD_DEBUG
+
+# Static mac address with /etc/udev/rules.d/75-static-mac
+ifeq (${MAC_ADDRESS},)
+MAC_ADDRESS=02:11:22:33:44:55
+endif
+export MAC_ADDRESS
+
 DTBPATH:=${BOOTLOADER}/configs/${TARGET}_defconfig
 # Allow override DTB on command-line or in environment
 # But usually compute from bootloader config
@@ -255,13 +265,21 @@ FORCE:
 %.cmd: %.tmp
 	./move_if_change $< $@
 
-archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd etc/network/interfaces
+75-static-mac: 75-static-mac.tmp
+	./move_if_change $< $@
+
+archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd etc/network/interfaces \
+    75-static-mac fw_printenv etc/fw_env.config
 	${RM} -r archivedir
 	${MKDIR} archivedir/boot
 	${CP} u-boot-${TARGET}.bin archivedir/u-boot.bin
 	${CP} boot.cmd archivedir/boot
 	${CP} boot.scr archivedir/boot
 	${CP} -a etc archivedir
+	${MKDIR} archivedir/etc/udev/rules.d
+	${CP} 75-static-mac archivedir/etc/udev/rules.d
+	${MKDIR} archivedir/usr/bin
+	${CP} fw_printenv archivedir/usr/bin
 	cd archivedir && fakeroot ${TAR} cvjf ../archive.tbz .
 
 boot.scr: boot.cmd
@@ -272,6 +290,14 @@ u-boot-${TARGET}.bin:
 	make -C ${BOOTLOADER} ${TARGET}_config
 	make -C ${BOOTLOADER}
 	${CP} ${BOOTLOADER}/${UBOOTBIN} $@
+
+# fw_printenv (for getting/setting u-boot environment from linux)
+# shipped with debian doesn't work for sunxi, so we overwrite the
+# debian-shipped binary with the one from current u-boot
+# https://blog.night-shade.org.uk/2014/01/fw_printenv-config-for-allwinner-devices/
+fw_printenv:
+	make -C ${BOOTLOADER} envtools
+	${CP} ${BOOTLOADER}/tools/env/fw_printenv $@
 
 .kernel-build.${DEBARCH}.stamp: config-sunxi
 	make -C ${KERNEL} distclean
@@ -304,7 +330,7 @@ u-boot-${TARGET}.bin:
 	    > dists/${DEBIANSUITE}/main/binary-${DEBARCH}/Packages.gz
 	zcat ${DEBBIN}/Packages.gz > ${DEBBIN}/Packages
 	cd ${DEBDST} && apt-ftparchive -c ${APTFTPCONF} release . \
-            > Release
+	    > Release
 	gpg --homedir gpg --yes --armor --output ${DEBDST}/Release.gpg \
 	    --detach-sig ${DEBDST}/Release
 	touch .sign-debs.${DEBARCH}.stamp
@@ -316,7 +342,7 @@ u-boot-${TARGET}.bin:
 	    ${RM} .webserver.stamp;        \
 	fi
 	python -m SimpleHTTPServer ${WEBSERVER_PORT} & \
-            echo $$! > $@
+	    echo $$! > $@
 	sleep 2
 
 show-kernel-version:
@@ -350,7 +376,7 @@ clean:
 	    ${RM} .webserver.stamp;        \
 	fi
 	${RM} archive.tbz elbe-payload.xml boot.scr boot.cmd  \
-            elbe.xml boot.tmp elbe.tmp gpg.tmp
+	    elbe.xml boot.tmp elbe.tmp gpg.tmp 75-static-mac fw_printenv
 	${RM} -r archivedir
 
 clobber: clean
