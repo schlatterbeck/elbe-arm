@@ -131,6 +131,9 @@ export VIDEO_MODE_UBOOT
 
 # HDMI Audio off, when on this may confuse some monitors
 # Orange-Pi Zero doesn't have HDMI at all
+# You may want to first ask EDID and set this to "EDID:0" but according
+# to http://linux-sunxi.org/Kernel_arguments it seems that audio is
+# shown to be supported when it definitely is not.
 ifeq (${HDMI_AUDIO},)
 ifeq (${TARGET},orangepi_zero)
 HDMI_AUDIO=
@@ -154,11 +157,7 @@ DTBPATH:=${BOOTLOADER}/configs/${TARGET}_defconfig
 # Allow override DTB on command-line or in environment
 # But usually compute from bootloader config
 ifeq (${DTB},)
-ifeq (${TARGET},A20-OLinuXino_MICRO-eMMC) # Workaround a bug in u-boot
-DTB:=sun7i-a20-olinuxino-micro-emmc
-else # No special TARGET
 DTB:=$(shell grep CONFIG_DEFAULT_DEVICE_TREE ${DTBPATH} | cut -d'"' -f2)
-endif # TARGET check
 endif # DTB
 export DTB
 
