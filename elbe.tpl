@@ -45,7 +45,7 @@
     <name>{{PROJECT}}</name>
     <version>1.0</version>
     <description>
-      For Olimex and Banana-Pi Boards
+      For Olimex, Banana-Pi and Orange-Pi Boards
     </description>
     <buildtype>{{DEBARCH}}</buildtype>
     <mirror>
@@ -65,7 +65,7 @@
         </url>
         <url>
           <binary>
-            http://debian.linutronix.de/elbe-testing {{DEBIANSUITE}} main
+            http://debian.linutronix.de/elbe {{DEBIANSUITE}} main
           </binary>
           <key>
             http://debian.linutronix.de/elbe/elbe-repo.pub
