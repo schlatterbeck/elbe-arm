@@ -14,3 +14,4 @@ gpg.cmd
 gpg
 elbe.xml
 fw_printenv
+75-static-mac

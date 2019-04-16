@@ -1,0 +1,15 @@
+trousers
+mosquitto
+locales
+build-essential
+autoconf
+autoconf-archive
+automake
+libtool
+pkg-config
+libssl-dev
+pandoc
+expect
+doxygen
+libcurl4-openssl-dev
+tpm2-tools
