@@ -1,0 +1,17 @@
+// Enable Audio codec and proper audio routing for orange-pi zero
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&codec>;
+		__overlay__ {
+			status = "okay";
+			allwinner,audio-routing =
+				"Line Out", "LINEOUT",
+				"MIC1", "Mic",
+				"Mic",  "MBIAS";
+		};
+	};
+};
+

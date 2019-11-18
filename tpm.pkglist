@@ -1,5 +1,3 @@
-trousers
-mosquitto
 locales
 build-essential
 autoconf
@@ -12,4 +10,7 @@ pandoc
 expect
 doxygen
 libcurl4-openssl-dev
-tpm2-tools
+xsltproc
+docbook-xml
+docbook-xsl
+docbook

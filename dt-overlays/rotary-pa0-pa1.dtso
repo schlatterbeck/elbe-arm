@@ -1,0 +1,38 @@
+// Rotary encoder on PA00 and PA01
+// rotary_pins.
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&pio>;
+		__overlay__ {
+			rotary_pins: rotary0 {
+				pins = "PA0", "PA1";
+				function = "gpio_in";
+				bias-pull-up;
+			};
+		};
+	};
+
+	fragment@1 {
+		__overlay__ {
+			rotary {
+				compatible = "rotary-encoder";
+				pinctrl-names = "default";
+				pinctrl-0 = <&rotary_pins>;
+				/* PA01 and PA00 */
+                                /* Last value 0 is GPIO_ACTIVE_HIGH */
+				gpios = <&pio 0 1 0>, <&pio 0 0 0>;
+				rotary-encoder,encoding = "gray";
+				rotary-encoder,relative-axis;
+				interrupt-parent = <&pio>;
+                                /* last two values:
+                                 * IRQ_TYPE_EDGE_FALLING = 2
+                                 * IRQ_TYPE_EDGE_RISING  = 1
+                                 */
+				interrupts = <0 0 (1 | 2)>, <0 1 (1 | 2)>;
+			};
+		};
+	};
+};

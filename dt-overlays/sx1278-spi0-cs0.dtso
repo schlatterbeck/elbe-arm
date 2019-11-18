@@ -1,0 +1,23 @@
+// SX1278 LoRa RF module on spi0 cs0
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&spi0>;
+		__overlay__ {
+			status = "okay";
+			sx1278@0 {
+				compatible = "sx1278";
+				reg = <0>;
+				status = "okay";
+				spi-max-frequency = <0x3b60>;
+				clock-frequency = <32000000>;
+				center-carrier-frq = <433775000>;
+				rf-bandwidth = <125000>;
+				spreading-factor = <4096>;
+			};
+		};
+	};
+};
+

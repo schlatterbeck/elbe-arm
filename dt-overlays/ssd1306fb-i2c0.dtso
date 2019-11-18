@@ -1,0 +1,26 @@
+// ssd1306fb (also for ssd1307fb) OLED display driver on i2c0
+// Note the ssd1306fb-i2c is for drivers/video/fbdev/ssd1307fb.c
+// while ssd1306 is for drivers/staging/fbtft/fb_ssd1306.c
+// Only the ssd1307fb driver seems to work.
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&i2c0>;
+		__overlay__ {
+			status = "okay";
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+                        clock-frequency = <100000>;
+			ssd1306@3c {
+				compatible = "solomon,ssd1306fb-i2c";
+				reg = <0x3c>;
+				solomon,height = <64>;
+				solomon,width = <128>;
+				solomon,page-offset = <8>;
+			};
+
+		};
+	};
+};

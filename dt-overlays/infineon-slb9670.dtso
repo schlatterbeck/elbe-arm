@@ -1,0 +1,25 @@
+// Use Infineon SLB9670 TPM Module on spi1, CS1
+// Note that on most boards (e.g. orange-pi) another fragment must
+// enable the chipselect 1 (CS1).
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&spi1>;
+		__overlay__ {
+			status = "okay";
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+
+			slb9670: slb9670@1 {
+				compatible = "infineon,slb9670";
+				reg = <1>;
+				spi-max-frequency = <32000000>;
+				status = "okay";
+			};
+ 
+		};
+	};
+};
+

@@ -1,6 +1,9 @@
 # Configuration. May be specified in the environment or on the make
 # commmand line via e.g. ``make ELBE_DIR=/usr/local/lib/elbe``
 
+DTSO:=$(shell find dt-overlays -type f -name '*.dtso')
+DTBO:=$(patsubst %.dtso,%.dtbo,$(DTSO))
+
 ifeq (${SDCARD_SIZE},)
 #SDCARD_SIZE=1900MiB
 SDCARD_SIZE=3724MiB
@@ -14,6 +17,7 @@ endif
 ifeq (${KERNEL},)
 KERNEL:=/usr/local/src/unpacked/linux
 endif
+DTC=$(KERNEL)/scripts/dtc/dtc
 
 ifeq (${ELBE_DIR},)
 ELBE_DIR:=/data/project/project/elbe/initvm
@@ -253,7 +257,7 @@ elbe-payload.xml: elbe.xml archive.tbz
 # changed. This prevents costly rebuilds but ensures the .xml is
 # recreated if the TARGET variable changes.
 
-%.tmp: %.tpl preprocess Makefile .sign-debs.${DEBARCH}.stamp FORCE
+%.tmp: %.tpl preprocess Makefile FORCE
 	env KERNELRELEASE=${KERNELRELEASE} ./preprocess $<
 
 FORCE:
@@ -268,7 +272,7 @@ FORCE:
 	./move_if_change $< $@
 
 archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd etc/network/interfaces \
-    75-static-mac fw_printenv etc/fw_env.config
+    75-static-mac fw_printenv etc/fw_env.config $(DTBO)
 	${RM} -r archivedir
 	${MKDIR} archivedir/boot
 	${CP} u-boot-${TARGET}.bin archivedir/u-boot.bin
@@ -279,6 +283,8 @@ archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd etc/network/interfaces \
 	${CP} 75-static-mac archivedir/etc/udev/rules.d
 	${MKDIR} archivedir/usr/bin
 	${CP} fw_printenv archivedir/usr/bin
+	${MKDIR} archivedir/boot/dtbo
+	${CP} -a $(DTBO) archivedir/boot/dtbo
 	cd archivedir && fakeroot ${TAR} cvjf ../archive.tbz .
 
 boot.scr: boot.cmd
@@ -368,6 +374,9 @@ GPG_KEY=$(shell gpg --list-secret-keys --homedir gpg | head -4 | tail -1)
 	gpg --homedir ./gpg --batch --generate-key gpg.cmd
 	gpg --homedir ./gpg --export --armor > gpg/pubring.asc
 	touch .gpg.stamp
+
+%.dtbo: %.dtso
+	$(DTC) -@ -I dts -O dtb -o $@ $<
 
 clean:
 	if [ -f .webserver.stamp ] ; then  \
