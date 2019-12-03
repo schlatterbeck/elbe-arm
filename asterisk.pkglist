@@ -10,3 +10,6 @@ python-setuptools
 nfs-kernel-server
 man-db
 bluez
+python-pyst
+sudo
+python-requests
