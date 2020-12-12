@@ -2,7 +2,7 @@ Image builder for Common ARM boards
 ===================================
 
 This package asumes a Debian installation and uses the Embedded Linux
-Build Environment (ELBE) für building custom images for many ARM based
+Build Environment (ELBE) for building custom images for many ARM based
 board. ELBE uses a KVM virtual machine for the whole build environment.
 Inside this machine a QEMU istance is run for the target architecture.
 The image is built from a standard debian repository. This ensures that
