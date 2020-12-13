@@ -26,8 +26,8 @@ You need to put the ELBE repositories into your
 ``/etc/apt/sources.list`` or into the ``sources.list.d`` directory::
 
   # ELBE
-  deb http://debian.linutronix.de/elbe stretch main
-  deb http://debian.linutronix.de/elbe-common stretch main
+  deb http://debian.linutronix.de/elbe buster main
+  deb http://debian.linutronix.de/elbe-common buster main
 
 The Linux kernel and the U-Boot bootloader are built on the local
 machine (not inside the ELBE VM), maybe at some later time I'll support

@@ -90,7 +90,7 @@ endif
 export DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX
 
 ifeq (${DEBIANSUITE},)
-DEBIANSUITE:=stretch
+DEBIANSUITE:=buster
 endif
 export DEBIANSUITE
 
@@ -105,7 +105,7 @@ endif
 # Framebuffer console device
 # Note that currently the templates put the serial console *last* so
 # /dev/console will be the serial device. This is much easier to capture
-# for debugging than the frambuffer console.
+# for debugging than the framebuffer console.
 ifeq (${FB_CONSOLE},)
 ifeq (${TARGET},orangepi_zero)
 FB_CONSOLE=
@@ -211,7 +211,7 @@ export ARCH
 # For serving a dynamically-generated debian repo we start a local
 # web-server (python SimpleHTTPServer) on the given port
 ifeq (${WEBSERVER_PORT},)
-WEBSERVER_PORT:=9090
+WEBSERVER_PORT:=9999
 endif
 export WEBSERVER_PORT
 
@@ -246,7 +246,8 @@ TAR:=/bin/tar
 MKIMAGE:=${BOOTLOADER}/tools/mkimage
 
 elbe: elbe-payload.xml .webserver.stamp
-	elbe initvm submit --directory $(ELBE_DIR) elbe-payload.xml
+	elbe initvm submit --directory $(ELBE_DIR) elbe-payload.xml \
+	    > elbe-build.log 2> elbe-build.err
 
 elbe-payload.xml: elbe.xml archive.tbz
 	${CP} elbe.xml elbe-payload.xml

@@ -1,0 +1,15 @@
+// Use Dallas DS3232 Real-Time Clock on I2C 2
+// Note that on most boards (e.g. Banana-Pi M2 Berry) another fragment
+// must enable the I2C-2 Bus
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&i2c2>;
+		__overlay__ {
+                        status = "okay";
+		};
+	};
+};
+

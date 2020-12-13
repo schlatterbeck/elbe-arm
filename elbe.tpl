@@ -174,7 +174,7 @@
         <options>size=2m</options>
       </bydev>
     </fstab>
-    <norecommend/>
+    <install-recommends/>
     <finetuning>
       <rm>/var/cache/apt/archives/*.deb</rm>
       <rm>/etc/udev/rules.d/70-persistent-net.rules</rm>
@@ -204,7 +204,7 @@
       <pkg>vlan</pkg>
       <pkg>vim-nox</pkg>
       <pkg>wget</pkg>
-      <pkg>host</pkg>
+      <pkg>bind9-host</pkg>
       <pkg>linux-image-{{KERNELRELEASE}}</pkg>
       {% for pkg in pkglist -%}
       <pkg>{{pkg}}</pkg>

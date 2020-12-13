@@ -1,0 +1,16 @@
+// Enable spi0 for the banana-pi m2 berry
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&spi0>;
+		__overlay__ {
+			status = "okay";
+                        pinctrl-names = "default", "default";
+                        pinctrl-0 = <&spi0_pc_pins>;
+                        pinctrl-1 = <&spi0_cs0_pc_pin>;
+		};
+	};
+};
+

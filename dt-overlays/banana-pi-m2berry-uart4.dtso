@@ -1,0 +1,25 @@
+// Enable uart4 for the banana-pi m2 berry
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&pio>;
+		__overlay__ {
+			uart4_ph_pins: uart4-ph-pins {
+				pins = "PH4", "PH5";
+				function = "uart4";
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&uart4>;
+		__overlay__ {
+			status = "okay";
+                        pinctrl-names = "default";
+                        pinctrl-0 = <&uart4_ph_pins>;
+		};
+	};
+};
+

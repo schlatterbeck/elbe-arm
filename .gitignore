@@ -3,6 +3,7 @@
 *.tbz
 *.scr
 *.tmp
+*.build
 .*.stamp
 uImage*
 elbe-payload.xml
@@ -15,3 +16,4 @@ gpg
 elbe.xml
 fw_printenv
 75-static-mac
+elbe-build.*

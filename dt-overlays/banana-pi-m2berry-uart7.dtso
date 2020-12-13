@@ -1,0 +1,25 @@
+// Enable uart7 for the banana-pi m2 berry
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&pio>;
+		__overlay__ {
+			uart7_pi_pins: uart7-pi-pins {
+				pins = "PI20", "PI21";
+				function = "uart7";
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&uart7>;
+		__overlay__ {
+			status = "okay";
+                        pinctrl-names = "default";
+                        pinctrl-0 = <&uart7_pi_pins>;
+		};
+	};
+};
+
