@@ -10,6 +10,7 @@ elbe-payload.xml
 archivedir
 debian-dist
 boot.cmd
+overlay.cmd
 elbe-build-*
 gpg.cmd
 gpg

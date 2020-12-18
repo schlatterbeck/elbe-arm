@@ -133,6 +133,37 @@ endif
 endif
 export VIDEO_MODE_UBOOT
 
+# Other U-Boot parameters for boot script
+ifeq (${BOOT_DEVICETYPE},)
+BOOT_DEVICETYPE=mmc
+endif
+export BOOT_DEVICETYPE
+
+ifeq (${BOOT_DEVICENUM},)
+BOOT_DEVICENUM=0
+endif
+export BOOT_DEVICENUM
+
+ifeq (${BOOT_PARTITION},)
+BOOT_PARTITION=1
+endif
+export BOOT_PARTITION
+
+ifeq (${BOOT_KERNEL_ADDRESS},)
+BOOT_KERNEL_ADDRESS=0x42000000
+endif
+export BOOT_KERNEL_ADDRESS
+
+ifeq (${BOOT_DTB_ADDRESS},)
+BOOT_DTB_ADDRESS=0x43000000
+endif
+export BOOT_DTB_ADDRESS
+
+ifeq (${BOOT_OVERLAY_ADDRESS},)
+BOOT_OVERLAY_ADDRESS=0x4300F000
+endif
+export BOOT_OVERLAY_ADDRESS
+
 # HDMI Audio off, when on this may confuse some monitors
 # Orange-Pi Zero doesn't have HDMI at all
 # You may want to first ask EDID and set this to "EDID:0" but according
@@ -166,6 +197,9 @@ endif # DTB
 export DTB
 
 DTBCPU:=$(shell echo ${DTB} | cut -d- -f1)
+
+# Allow a specified DTB_OVERLAYS variable (space separated overlay
+# basenames)
 
 ifeq (${CROSS_COMPILE},)
 ifeq (${DTBCPU},bcm2835)
@@ -272,13 +306,15 @@ FORCE:
 75-static-mac: 75-static-mac.tmp
 	./move_if_change $< $@
 
-archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd etc/network/interfaces \
+archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd overlay.cmd \
+    etc/network/interfaces \
     75-static-mac fw_printenv etc/fw_env.config $(DTBO)
 	${RM} -r archivedir
 	${MKDIR} archivedir/boot
 	${CP} u-boot-${TARGET}.bin archivedir/u-boot.bin
 	${CP} boot.cmd archivedir/boot
 	${CP} boot.scr archivedir/boot
+	${CP} overlay.cmd archivedir/boot
 	${CP} -a etc archivedir
 	${MKDIR} archivedir/etc/udev/rules.d
 	${CP} 75-static-mac archivedir/etc/udev/rules.d
@@ -309,7 +345,7 @@ fw_printenv:
 	make -C ${KERNEL} distclean
 	${CP} config-sunxi ${KERNEL}/.config
 	make -C ${KERNEL} oldconfig
-	make -C ${KERNEL} deb-pkg
+	make -C ${KERNEL} DTC_FLAGS=-@ deb-pkg
 	touch .kernel-build.${DEBARCH}.stamp
 
 .kernel-package.${DEBARCH}.stamp ${DEBPOOL}: .kernel-build.${DEBARCH}.stamp \
