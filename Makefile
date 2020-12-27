@@ -303,6 +303,9 @@ FORCE:
 %.cmd: %.tmp
 	./move_if_change $< $@
 
+%.scr: %.cmd
+	$(MKIMAGE) -T script -C none -A arm -n 'bootscript' -d $< $@
+
 75-static-mac: 75-static-mac.tmp
 	./move_if_change $< $@
 
@@ -323,9 +326,6 @@ archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd overlay.cmd \
 	${MKDIR} archivedir/boot/dtbo
 	${CP} -a $(DTBO) archivedir/boot/dtbo
 	cd archivedir && fakeroot ${TAR} cvjf ../archive.tbz .
-
-boot.scr: boot.cmd
-	$(MKIMAGE) -T script -C none -A arm -n 'bootscript' -d boot.cmd boot.scr
 
 u-boot-${TARGET}.bin:
 	make -C ${BOOTLOADER} clean

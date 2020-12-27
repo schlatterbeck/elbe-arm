@@ -8,6 +8,9 @@
 	fragment@0 {
 		target = <&i2c2>;
 		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
 			rtc0: ds3232@68 {
 				compatible = "dallas,ds3232";
 				reg = <0x68>;

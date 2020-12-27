@@ -6,9 +6,11 @@ bootp
 tftpboot 0x43000000 tftpboot/micro-dtb
 fdt addr 0x43000000
 fdt resize
-for ov in ${overlay}; do
-    echo overlaying ${ov}
-    tftpboot 0x4300F000 tftpboot/dtbo/${ov}.dtbo && fdt apply 0x4300F000
-done
+if tftpboot 0x4300F000 tftpboot/overlay.cmd && env import -t 0x4300F000 ${filesize} && test -n ${overlay}; then
+    for ov in ${overlay}; do
+        echo overlaying ${ov}
+        tftpboot 0x4300F000 tftpboot/dtbo/${ov}.dtbo && fdt apply 0x4300F000
+    done
+fi
 #tftpboot 0x42000000 tftpboot/micro-zImage
 bootz 0x42000000 - 0x43000000

@@ -1,0 +1,50 @@
+// Use MAX9744 20W Audio Amplifier on I2C 2
+// Note that on most boards another fragment must enable the I2C-2 Bus
+/dts-v1/;
+/plugin/;
+
+/ {
+        fragment@0 {
+                target = <&pio>;
+                __overlay__ {
+                        max9744_pins: max9744_0 {
+                                pins = "PH14", "PH15";
+                                function = "gpio_in";
+                                bias-pull-up;
+                        };
+                };
+        };
+
+	fragment@1 {
+		target = <&i2c2>;
+
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			amp0: max9744@4b {
+				compatible = "maxim,max9744";
+				reg = <0x4b>;
+				pinctrl-names = "default";
+				pinctrl-0 = <&max9744_pins>;
+                                /* Mute is inverted (active low) on
+                                 * Adafruit 9744 breakout
+                                 */
+				mute-gpio = <&pio 7 15 1>;
+				shdn-gpio = <&pio 7 14 0>;
+			};
+		};
+	};
+
+	fragment@2 {
+		target = <&codec>;
+
+		__overlay__ {
+			generic,aux-devs = <&amp0>;
+			generic,aux-audio-routing =
+				"Amp-IN-L", "HP Left",
+				"Amp-IN-R", "HP Right";
+		};
+        };
+};
+

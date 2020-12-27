@@ -6,7 +6,10 @@
 	fragment@0 {
 		target = <&spi0>;
 		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
 			status = "okay";
+
 			sx1278@0 {
 				compatible = "sx1278";
 				reg = <0>;

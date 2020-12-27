@@ -6,6 +6,9 @@
 	fragment@0 {
 		target = <&spi0>;
 		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
 			status = "okay";
 			spi-max-frequency = <50000000>;
 
