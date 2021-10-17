@@ -5,7 +5,7 @@ setenv overlay max9744-i2c2 rda5807-i2c2 simple-sound
 bootp
 tftpboot 0x43000000 tftpboot/micro-dtb
 fdt addr 0x43000000
-fdt resize
+fdt resize 0x2000
 if tftpboot 0x4300F000 tftpboot/overlay.cmd && env import -t 0x4300F000 ${filesize} && test -n ${overlay}; then
     for ov in ${overlay}; do
         echo overlaying ${ov}

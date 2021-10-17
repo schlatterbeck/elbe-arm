@@ -13,6 +13,7 @@
 			radio0: rda5807@11 {
 				compatible = "rda,rda5807";
 				reg = <0x11>;
+                                output-flags = <0x1>;
 			};
 		};
 	};

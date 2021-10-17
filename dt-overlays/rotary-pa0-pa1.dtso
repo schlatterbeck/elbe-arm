@@ -16,6 +16,7 @@
 	};
 
 	fragment@1 {
+                target-path = "/";
 		__overlay__ {
 			rotary {
 				compatible = "rotary-encoder";

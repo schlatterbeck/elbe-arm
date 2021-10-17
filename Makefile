@@ -413,7 +413,7 @@ GPG_KEY=$(shell gpg --list-secret-keys --homedir gpg | head -4 | tail -1)
 	touch .gpg.stamp
 
 %.dtbo: %.dtso
-	$(DTC) -@ -I dts -O dtb -o $@ $<
+	$(DTC) -@ -I dts -i $(KERNEL)/include -O dtb -o $@ $<
 
 clean:
 	if [ -f .webserver.stamp ] ; then  \
