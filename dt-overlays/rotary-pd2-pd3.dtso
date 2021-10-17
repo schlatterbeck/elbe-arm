@@ -1,0 +1,39 @@
+// Rotary encoder on PD02 and PD03
+// rotary_pins.
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&pio>;
+		__overlay__ {
+			rotary_pins_pd2_pd3: rotary_pd2_pd3 {
+				pins = "PD2", "PD3";
+				function = "gpio_in";
+				bias-pull-up;
+			};
+		};
+	};
+
+	fragment@1 {
+                target-path = "/";
+		__overlay__ {
+			rotary_pd2_pd3 {
+				compatible = "rotary-encoder";
+				pinctrl-names = "default";
+				pinctrl-0 = <&rotary_pins_pd2_pd3>;
+				/* PD02 and PD03 */
+                                /* Last value 0 is GPIO_ACTIVE_HIGH */
+				gpios = <&pio 3 2 0>, <&pio 3 3 0>;
+				rotary-encoder,encoding = "gray";
+				rotary-encoder,relative-axis;
+				interrupt-parent = <&pio>;
+                                /* last two values:
+                                 * IRQ_TYPE_EDGE_FALLING = 2
+                                 * IRQ_TYPE_EDGE_RISING  = 1
+                                 */
+				interrupts = <3 2 (1 | 2)>, <3 3 (1 | 2)>;
+			};
+		};
+	};
+};

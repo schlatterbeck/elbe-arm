@@ -1,0 +1,26 @@
+// Use *TWO* 24C08 EEPROMs on i2c2
+// Note that on most boards another fragment must enable the I2C-2 Bus
+/dts-v1/;
+/plugin/;
+
+/ {
+	fragment@0 {
+		target = <&i2c2>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			eeprom0: eeprom@50 {
+				compatible = "atmel,24c08";
+				reg = <0x50>;
+				pagesize = <16>;
+			};
+			eeprom1: eeprom@54 {
+				compatible = "atmel,24c08";
+				reg = <0x54>;
+				pagesize = <16>;
+			};
+		};
+	};
+};
+
