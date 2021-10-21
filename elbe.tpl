@@ -54,15 +54,18 @@
       <primary_proto>{{DEBIAN_MIRROR_PROTOCOL}}</primary_proto>
       <url-list>
         <url>
+          <!--
           <binary>
             {{DEBIAN_SECURITY_MIRROR_PROTOCOL}}://{{DEBIAN_SECURITY_MIRROR_HOST}}{{DEBIAN_SECURITY_MIRROR_PATH}} {{DEBIANSUITE}}{{DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX}} main
           </binary>
+          -->
         </url>
         <url>
           <binary>
             {{DEBIAN_VOLATILE_MIRROR_PROTOCOL}}://{{DEBIAN_VOLATILE_MIRROR_HOST}}{{DEBIAN_VOLATILE_MIRROR_PATH}} {{DEBIANSUITE}}{{DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX}} main
           </binary>
         </url>
+        <!--
         <url>
           <binary>
             http://debian.linutronix.de/elbe {{DEBIANSUITE}} main
@@ -79,6 +82,7 @@
             http://debian.linutronix.de/elbe/elbe-repo.pub
           </key>
         </url>
+        -->
         <url>
           <binary>
             {{WEBSERVER_URL}} {{DEBIANSUITE}} main
@@ -173,6 +177,14 @@
         </fs>
         <options>size=2m</options>
       </bydev>
+      <bydev>
+        <source>tmpfs</source>
+        <mountpoint>/var/lib/dhcp</mountpoint>
+        <fs>
+          <type>tmpfs</type>
+        </fs>
+        <options>size=1m</options>
+      </bydev>
     </fstab>
     <install-recommends/>
     <finetuning>
@@ -183,15 +195,15 @@
     </finetuning>
     <pkg-list>
       <pkg>bash</pkg>
-      <pkg>python</pkg>
-      <pkg>python-dev</pkg>
       <pkg>python3</pkg>
       <pkg>python3-dev</pkg>
       <pkg>git</pkg>
       <pkg>nfs-common</pkg>
       <pkg>openssh-server</pkg>
       <pkg>less</pkg>
+      <!-- not found
       <pkg>ntp</pkg>
+      -->
       <pkg>rsyslog</pkg>
       <pkg>logrotate</pkg>
       <pkg>ifupdown</pkg>

@@ -90,7 +90,7 @@ endif
 export DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX
 
 ifeq (${DEBIANSUITE},)
-DEBIANSUITE:=buster
+DEBIANSUITE:=bullseye
 endif
 export DEBIANSUITE
 
@@ -266,6 +266,7 @@ KERNELRELEASE=$(shell cat ${KERNEL}/include/config/kernel.release)
 KERNELREV=$(shell cat ${KERNEL}/.version)
 KV=${KERNELRELEASE}_${KERNELRELEASE}
 KR=${KERNELREV}
+KS=${KERNELRELEASE}
 
 DEBPOOL:=debian-dist/pool
 DEBDST:=debian-dist/dists/${DEBIANSUITE}
@@ -301,6 +302,9 @@ FORCE:
 	./move_if_change $< $@
 
 %.cmd: %.tmp
+	./move_if_change $< $@
+
+%.conf: %.tmp
 	./move_if_change $< $@
 
 %.scr: %.cmd
@@ -353,19 +357,20 @@ fw_printenv:
 	${RM} -r ${DEBSRC} ${DEBBIN}
 	${MKDIR} ${DEBPOOL} ${DEBSRC} ${DEBBIN}
 	${CP} gpg/pubring.asc debian-dist/pubring.asc
-	${CP} ${KERNEL}/../linux-${KV}.orig.tar.gz                            \
+	${CP} ${KERNEL}/../linux-upstream_${KS}.orig.tar.gz                   \
 	    ${KERNEL}/../linux-headers-${KV}-${KR}_${DEBARCH}.deb             \
-	    ${KERNEL}/../linux-${KV}-${KR}_${DEBARCH}.changes                 \
+	    ${KERNEL}/../linux-upstream_${KS}-${KR}_${DEBARCH}.changes        \
 	    ${KERNEL}/../linux-image-${KV}-${KR}_${DEBARCH}.deb               \
-	    ${KERNEL}/../linux-libc-dev_${KERNELRELEASE}-${KR}_${DEBARCH}.deb \
-	    ${KERNEL}/../linux-${KV}-${KR}.dsc ${DEBPOOL}
+	    ${KERNEL}/../linux-libc-dev_${KS}-${KR}_${DEBARCH}.deb            \
+	    ${KERNEL}/../linux-upstream_${KS}-${KR}.dsc ${DEBPOOL}
 	cd debian-dist && dpkg-scansources pool . | gzip -9 - \
 	    > dists/${DEBIANSUITE}/main/source/Sources.gz
 	zcat ${DEBSRC}/Sources.gz > ${DEBSRC}/Sources
 	touch .kernel-package.${DEBARCH}.stamp
 
 # Note: Need to create Release file *after* signing deb packages
-.sign-debs.${DEBARCH}.stamp: .kernel-package.${DEBARCH}.stamp .gpg.stamp
+.sign-debs.${DEBARCH}.stamp: .kernel-package.${DEBARCH}.stamp .gpg.stamp \
+    apt-ftparchive.conf
 	dpkg-sig -g "--homedir gpg" --sign builder \
 	    debian-dist/pool/linux-*_${DEBARCH}.deb
 	cd debian-dist && dpkg-scanpackages -a ${DEBARCH} pool | gzip -9 - \
