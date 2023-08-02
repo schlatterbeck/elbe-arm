@@ -8,7 +8,7 @@
       <url-list>
         <url>
           <binary>
-            http://debian.linutronix.de/elbe-testing {{DEBIANSUITE}} main
+            http://debian.linutronix.de/elbe bullseye main
           </binary>
           <key>
             http://debian.linutronix.de/elbe/elbe-repo.pub
@@ -16,7 +16,7 @@
         </url>
         <url>
           <binary>
-            http://debian.linutronix.de/elbe-common {{DEBIANSUITE}} main
+            http://debian.linutronix.de/elbe-common bullseye main
           </binary>
           <key>
             http://debian.linutronix.de/elbe/elbe-repo.pub
@@ -24,7 +24,7 @@
         </url>
       </url-list>
     </mirror>
-    <suite>{{DEBIANSUITE}}</suite>
+    <suite>bullseye</suite>
     <pkg-list>
       <pkg>openssh-server</pkg>
     </pkg-list>
@@ -54,16 +54,20 @@
       <primary_proto>{{DEBIAN_MIRROR_PROTOCOL}}</primary_proto>
       <url-list>
         <url>
-          <!--
           <binary>
             {{DEBIAN_SECURITY_MIRROR_PROTOCOL}}://{{DEBIAN_SECURITY_MIRROR_HOST}}{{DEBIAN_SECURITY_MIRROR_PATH}} {{DEBIANSUITE}}{{DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX}} main
           </binary>
-          -->
+          <source>
+            {{DEBIAN_SECURITY_MIRROR_PROTOCOL}}://{{DEBIAN_SECURITY_MIRROR_HOST}}{{DEBIAN_SECURITY_MIRROR_PATH}} {{DEBIANSUITE}}{{DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX}} main
+          </source>
         </url>
         <url>
           <binary>
             {{DEBIAN_VOLATILE_MIRROR_PROTOCOL}}://{{DEBIAN_VOLATILE_MIRROR_HOST}}{{DEBIAN_VOLATILE_MIRROR_PATH}} {{DEBIANSUITE}}{{DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX}} main
           </binary>
+          <source>
+            {{DEBIAN_VOLATILE_MIRROR_PROTOCOL}}://{{DEBIAN_VOLATILE_MIRROR_HOST}}{{DEBIAN_VOLATILE_MIRROR_PATH}} {{DEBIANSUITE}}{{DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX}} main
+          </source>
         </url>
         <!--
         <url>
@@ -87,6 +91,9 @@
           <binary>
             {{WEBSERVER_URL}} {{DEBIANSUITE}} main
           </binary>
+          <source>
+            {{WEBSERVER_URL}} {{DEBIANSUITE}} main
+          </source>
           <key>
             {{WEBSERVER_URL}}/pubring.asc
           </key>
@@ -99,7 +106,8 @@
   <target>
     <hostname>{{HOST_NAME}}</hostname>
     <domain>local</domain>
-    <passwd>xyzzy</passwd>
+    <!-- xyzzy -->
+    <passwd_hashed>$6$rounds=6500$JeQ0Z.AcT31/8QuA$eqXqkb5QjESmlgryNY.lj60K/Bnzt62gsYhDg6U8g/GYCD7qKELIYWTTjM0qXChaXdiOhG.STouJ4wzGl4Yvv/</passwd_hashed>
     <console>ttyAMA0,115200</console>
     <package>
       <tar>

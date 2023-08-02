@@ -5,6 +5,7 @@
 *.tmp
 *.build
 .*.stamp
+.*.swp
 uImage*
 elbe-payload.xml
 archivedir
@@ -19,3 +20,4 @@ fw_printenv
 75-static-mac
 elbe-build.*
 builds
+*stuff

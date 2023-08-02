@@ -10,25 +10,29 @@ env = Environment \
     , lstrip_blocks = False
     )
 
-class Env (object) :
+class Env (object):
 
-    def __init__ (self) :
+    def __init__ (self):
         self.pkglist = []
         pkgfiles = os.environ.get ('PKGFILES', None)
-        if pkgfiles :
-            for fn in pkgfiles.split (',') :
-                with open (fn) as f :
-                    for line in f :
+        if pkgfiles:
+            for fn in pkgfiles.split (','):
+                with open (fn) as f:
+                    for line in f:
                         self.pkglist.append (line.strip ())
     # end def __init__
 
-    def __getitem__ (self, name) :
-        if name == 'pkglist' :
+    def __getitem__ (self, name):
+        if name == 'pkglist':
             return self.pkglist
         return os.environ [name]
     # end def __getitem__
 
-    def keys (self) :
+    def __iter__ (self):
+        return iter (self.keys ())
+    # end def __iter__
+
+    def keys (self):
         k = list (os.environ.keys ())
         k.append ('pkglist')
         return k
@@ -38,9 +42,9 @@ class Env (object) :
 
 env.globals = Env ()
 
-for fn in sys.argv [1:] :
+for fn in sys.argv [1:]:
     base, ext = os.path.splitext (fn)
     outfn = base + '.' + 'tmp'
-    with open (outfn, 'w') as f :
+    with open (outfn, 'w') as f:
         tpl = env.get_template (fn)
         f.write (tpl.render ())

@@ -34,6 +34,11 @@ DEBEMAIL:=anonymous@example.com
 endif
 export DEBEMAIL
 
+ifeq (${DEBIANSUITE},)
+DEBIANSUITE:=bookworm
+endif
+export DEBIANSUITE
+
 ifeq (${DEBIAN_MIRROR_HOST},)
 DEBIAN_MIRROR_HOST:=ftp.debian.org
 endif
@@ -55,7 +60,7 @@ endif
 export DEBIAN_SECURITY_MIRROR_HOST
 
 ifeq (${DEBIAN_SECURITY_MIRROR_PATH},)
-DEBIAN_SECURITY_MIRROR_PATH:=/debian-security
+DEBIAN_SECURITY_MIRROR_PATH:=/security
 endif
 export DEBIAN_SECURITY_MIRROR_PATH
 
@@ -65,7 +70,7 @@ endif
 export DEBIAN_SECURITY_MIRROR_PROTOCOL
 
 ifeq (${DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX},)
-DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX:=/updates
+DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX:=-security
 endif
 export DEBIAN_SECURITY_MIRROR_SUITE_SUFFIX
 
@@ -88,11 +93,6 @@ ifeq (${DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX},)
 DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX:=-updates
 endif
 export DEBIAN_VOLATILE_MIRROR_SUITE_SUFFIX
-
-ifeq (${DEBIANSUITE},)
-DEBIANSUITE:=bullseye
-endif
-export DEBIANSUITE
 
 # TARGET, usually specified on command line
 # e.g. for Bananapi M2+ (and -EDU variant): Sinovoip_BPI_M2_Plus
@@ -243,7 +243,7 @@ ARCH:=$(shell echo ${CROSS_COMPILE} | cut -d- -f1)
 export ARCH
 
 # For serving a dynamically-generated debian repo we start a local
-# web-server (python SimpleHTTPServer) on the given port
+# web-server (python -m http.server) on the given port
 ifeq (${WEBSERVER_PORT},)
 WEBSERVER_PORT:=9999
 endif
@@ -272,6 +272,7 @@ DEBPOOL:=debian-dist/pool
 DEBDST:=debian-dist/dists/${DEBIANSUITE}
 DEBSRC:=${DEBDST}/main/source
 DEBBIN:=${DEBDST}/main/binary-${DEBARCH}
+# This doesn't depend on the file existing:
 APTFTPCONF:=$(shell realpath apt-ftparchive.conf)
 
 RM:=rm -f
@@ -293,7 +294,7 @@ elbe-payload.xml: elbe.xml archive.tbz
 # changed. This prevents costly rebuilds but ensures the .xml is
 # recreated if the TARGET variable changes.
 
-%.tmp: %.tpl preprocess Makefile FORCE
+%.tmp: %.tpl preprocess Makefile kversion FORCE
 	env KERNELRELEASE=${KERNELRELEASE} ./preprocess $<
 
 FORCE:
@@ -307,7 +308,7 @@ FORCE:
 %.conf: %.tmp
 	./move_if_change $< $@
 
-%.scr: %.cmd
+%.scr: %.cmd ${MKIMAGE}
 	$(MKIMAGE) -T script -C none -A arm -n 'bootscript' -d $< $@
 
 75-static-mac: 75-static-mac.tmp
@@ -331,6 +332,11 @@ archive.tbz: u-boot-${TARGET}.bin boot.scr boot.cmd overlay.cmd \
 	${CP} -a $(DTBO) archivedir/boot/dtbo
 	cd archivedir && fakeroot ${TAR} cvjf ../archive.tbz .
 
+${MKIMAGE}:
+	make -C ${BOOTLOADER} clean
+	make -C ${BOOTLOADER} ${TARGET}_config
+	make -C ${BOOTLOADER} tools
+
 u-boot-${TARGET}.bin:
 	make -C ${BOOTLOADER} clean
 	make -C ${BOOTLOADER} ${TARGET}_config
@@ -342,6 +348,8 @@ u-boot-${TARGET}.bin:
 # debian-shipped binary with the one from current u-boot
 # https://blog.night-shade.org.uk/2014/01/fw_printenv-config-for-allwinner-devices/
 fw_printenv:
+	make -C ${BOOTLOADER} clean
+	make -C ${BOOTLOADER} ${TARGET}_config
 	make -C ${BOOTLOADER} envtools
 	${CP} ${BOOTLOADER}/tools/env/fw_printenv $@
 
@@ -357,12 +365,14 @@ fw_printenv:
 	${RM} -r ${DEBSRC} ${DEBBIN}
 	${MKDIR} ${DEBPOOL} ${DEBSRC} ${DEBBIN}
 	${CP} gpg/pubring.asc debian-dist/pubring.asc
-	${CP} ${KERNEL}/../linux-upstream_${KS}.orig.tar.gz                   \
-	    ${KERNEL}/../linux-headers-${KV}-${KR}_${DEBARCH}.deb             \
-	    ${KERNEL}/../linux-upstream_${KS}-${KR}_${DEBARCH}.changes        \
-	    ${KERNEL}/../linux-image-${KV}-${KR}_${DEBARCH}.deb               \
-	    ${KERNEL}/../linux-libc-dev_${KS}-${KR}_${DEBARCH}.deb            \
-	    ${KERNEL}/../linux-upstream_${KS}-${KR}.dsc ${DEBPOOL}
+	${CP} ${KERNEL}/../linux-headers-${KV}-${KR}_${DEBARCH}.deb    \
+	    ${KERNEL}/../linux-image-${KV}-${KR}_${DEBARCH}.deb        \
+	    ${KERNEL}/../linux-libc-dev_${KS}-${KR}_${DEBARCH}.deb     \
+	    ${KERNEL}/../linux-upstream_${KS}-${KR}_${DEBARCH}.changes \
+	    ${KERNEL}/../linux-upstream_${KS}-${KR}.diff.gz            \
+	    ${KERNEL}/../linux-upstream_${KS}-${KR}.dsc                \
+	    ${KERNEL}/../linux-upstream_${KS}.orig.tar.gz              \
+	    ${DEBPOOL}
 	cd debian-dist && dpkg-scansources pool . | gzip -9 - \
 	    > dists/${DEBIANSUITE}/main/source/Sources.gz
 	zcat ${DEBSRC}/Sources.gz > ${DEBSRC}/Sources
@@ -371,8 +381,6 @@ fw_printenv:
 # Note: Need to create Release file *after* signing deb packages
 .sign-debs.${DEBARCH}.stamp: .kernel-package.${DEBARCH}.stamp .gpg.stamp \
     apt-ftparchive.conf
-	dpkg-sig -g "--homedir gpg" --sign builder \
-	    debian-dist/pool/linux-*_${DEBARCH}.deb
 	cd debian-dist && dpkg-scanpackages -a ${DEBARCH} pool | gzip -9 - \
 	    > dists/${DEBIANSUITE}/main/binary-${DEBARCH}/Packages.gz
 	zcat ${DEBBIN}/Packages.gz > ${DEBBIN}/Packages
@@ -380,6 +388,8 @@ fw_printenv:
 	    > Release
 	gpg --homedir gpg --yes --armor --output ${DEBDST}/Release.gpg \
 	    --detach-sig ${DEBDST}/Release
+	cat ${DEBDST}/Release | gpg --homedir gpg --yes --clearsign \
+	    > ${DEBDST}/InRelease
 	touch .sign-debs.${DEBARCH}.stamp
 
 # Start local webserver for repository generated above
@@ -388,11 +398,15 @@ fw_printenv:
 	    kill $$(cat .webserver.stamp); \
 	    ${RM} .webserver.stamp;        \
 	fi
-	python -m SimpleHTTPServer ${WEBSERVER_PORT} & \
+	python3 -m http.server ${WEBSERVER_PORT} & \
 	    echo $$! > $@
 	sleep 2
 
-show-kernel-version:
+kversion:
+	${CP} config-sunxi ${KERNEL}/.config
+	make -C ${KERNEL} oldconfig dtbs_prepare
+
+show-kernel-version: kversion
 	@echo ${KERNELRELEASE} ${KERNELREV}
 
 show-dtb:
@@ -426,7 +440,8 @@ clean:
 	    ${RM} .webserver.stamp;        \
 	fi
 	${RM} archive.tbz elbe-payload.xml boot.scr boot.cmd  \
-	    elbe.xml boot.tmp elbe.tmp gpg.tmp 75-static-mac fw_printenv
+	    elbe.xml boot.tmp elbe.tmp gpg.tmp 75-static-mac fw_printenv \
+	    apt-ftparchive.conf
 	${RM} -r archivedir
 
 clobber: clean
@@ -434,6 +449,7 @@ clobber: clean
 	${RM} .kernel-package.*.stamp .sign-debs.*.stamp \
 	u-boot-*.bin gpg.cmd .kernel-build.*.stamp
 
-.PHONY: clean clobber show-kernel-version show-dtb show-env FORCE
+.PHONY: clean clobber show-kernel-version show-dtb show-env FORCE \
+    kversion
 .PRECIOUS: .sign-debs.${DEBARCH}.stamp .kernel-package.${DEBARCH}.stamp \
     .kernel-build.${DEBARCH}.stamp gpg gpg.cmd .webserver.stamp
