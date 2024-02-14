@@ -26,8 +26,8 @@ You need to put the ELBE repositories into your
 ``/etc/apt/sources.list`` or into the ``sources.list.d`` directory::
 
   # ELBE
-  deb http://debian.linutronix.de/elbe buster main
-  deb http://debian.linutronix.de/elbe-common buster main
+  deb http://debian.linutronix.de/elbe bookworm main
+  deb http://debian.linutronix.de/elbe-common bookworm main
 
 The Linux kernel and the U-Boot bootloader are built on the local
 machine (not inside the ELBE VM), maybe at some later time I'll support
@@ -82,9 +82,10 @@ dependency in the Makefile on the board names is currently the name of
 the DTB-File to use for the board: The DTB is set in the Makefile
 depending on the target board. The board name is specified with the
 TARGET environment variable or ``Makefile`` parameter. Since U-Boot also
-contains a mechanism for computing the name of the DTB, we use the
-same mechanism. In case of some boards (where U-Boot gets it wrong) we
-can override the setting.
+contains a mechanism for computing the name of the DTB (it is spefied in
+the variable ``CONFIG_DEFAULT_DEVICE_TREE`` in the file
+``$TARGET_defconfig``), we use the same mechanism. In case of some
+boards (where U-Boot gets it wrong) we can override the setting.
 
 If you need to use your own DTB-File, you should make sure the source is
 in the used kernel sources and it is built during kernel build, because
@@ -101,13 +102,13 @@ and a custom-built Debian kernel-package to be used with ELBE. ELBE
 supports only signed repositories currently. So this project sets up a
 signed repository with a throwaway GPG key. Then it starts a Webserver
 in the local directory (using python's built-in webserver) on a
-configurable port (9090 by default). This webserver might pose a
+configurable port (9999 by default). This webserver might pose a
 security risk and you should be able to kill it using ``make clean``.
 Alternatively, if that doesn't work and you want to be sure no server is
 running you should look for a process with the command-line similar to
 the following (the port might differ if you have changed it)::
 
-  python -m SimpleHTTPServer 9090
+  python3 -m http.server 9999
 
 For the local debian repository with the kernel packages you want to set
 the debian maintainer settings for the built debian source package::
@@ -125,7 +126,15 @@ When everything is set up you typically invoke the command ::
 
   make TARGET=A20-OLinuXino-Lime
 
-or you use a different target.
+or you use a different target. The following targets were tested:
+
+- A20-OLinuXino-Lime for the Olimex A20-OLinuXino-LIME
+- A20-OLinuXino_MICRO for the Olimex A20-OLinuXino-MICRO
+- orangepi_zero for the Orange Pi Zero
+
+The target names are taken from the target names in U-Boot in the
+directory ``configs`` (the names get the additional suffix
+``_defconfig``).
 
 You can specify an environment variable PKGFILES with a comma-separated
 list of files with debian package names, one on each line to add
@@ -148,6 +157,29 @@ Example::
 
   make MAC_ADDRESS=02:03:04:05:06:07 TARGET=A20-OLinuXino-Lime
 
+This may not work as advertised depending on what your bootloader does
+or if the board has a MAC address configured with other means.
+
+Device Tree Overlays
+--------------------
+
+The directory dt-overlays contains various device tree overlay snippets.
+These are always copied to the target (into ``/boot/dtbo``), together
+with a generated file ``overlay.cmd`` generated from ``overlay.tpl``.
+The ``overlay.cmd`` contains the overlays to be loaded from the
+directory ``/boot/dtbo`` (without the .dtbo suffix for the overlay files).
+
+Overlays can be specified on the make command line with the variable
+``DTB_OVERLAYS``, e.g.::
+
+  make TARGET=orangepi_zero \
+    DTB_OVERLAYS='orange-pi-audio-codec orange-pi-nor-flash'
+
+For my (currently unpublished) car-radio project I'm using
+
+    DTB_OVERLAYS='${CAR_RADIO_OVERLAYS}'
+
+where the variable ``CAR_RADIO_OVERLAYS`` is defined in the ``Makefile``.
 
 Bugs
 ----

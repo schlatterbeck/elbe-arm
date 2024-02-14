@@ -1,6 +1,6 @@
-// Use Dallas DS3232 Real-Time Clock on I2C 2
-// Note that on most boards (e.g. Banana-Pi M2 Berry) another fragment
-// must enable the I2C-2 Bus
+// Enable the I2C-2 Bus
+// Not needed for Olimex A20-Olinuxino Micro TARGET=A20-OLinuXino_MICRO
+
 /dts-v1/;
 /plugin/;
 

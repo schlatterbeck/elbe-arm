@@ -5,11 +5,10 @@ asterisk-prompt-de
 asterisk-voicemail
 apache2
 madplay
-python-pip
-python-setuptools
+python3-pip
+python3-setuptools
 nfs-kernel-server
 man-db
 bluez
-python-pyst
 sudo
-python-requests
+python3-requests

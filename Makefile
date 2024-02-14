@@ -198,8 +198,18 @@ export DTB
 
 DTBCPU:=$(shell echo ${DTB} | cut -d- -f1)
 
+# My car radio project, currently unpublished
+CAR_RADIO_OVERLAYS:=a20-max9744-i2c2 rda5807-i2c2 \
+    rotary-pd0-pd1 rotary-pd2-pd3 eeprom-i2c2 hd44780-2x16-i2c1-pcf8574
+
 # Allow a specified DTB_OVERLAYS variable (space separated overlay
 # basenames)
+ifeq (${DTB_OVERLAYS},)
+ifeq (${TARGET},orangepi_zero)
+DTB_OVERLAYS:=orange-pi-audio-codec orange-pi-nor-flash
+endif
+endif
+export DTB_OVERLAYS
 
 ifeq (${CROSS_COMPILE},)
 ifeq (${DTBCPU},bcm2835)
@@ -434,6 +444,9 @@ GPG_KEY=$(shell gpg --list-secret-keys --homedir gpg | head -4 | tail -1)
 %.dtbo: %.dtso
 	$(DTC) -@ -I dts -i $(KERNEL)/include -O dtb -o $@ $<
 
+show_overlays:
+	@echo ${DTB_OVERLAYS}
+
 clean:
 	if [ -f .webserver.stamp ] ; then  \
 	    kill $$(cat .webserver.stamp); \
@@ -441,7 +454,7 @@ clean:
 	fi
 	${RM} archive.tbz elbe-payload.xml boot.scr boot.cmd  \
 	    elbe.xml boot.tmp elbe.tmp gpg.tmp 75-static-mac fw_printenv \
-	    apt-ftparchive.conf
+	    apt-ftparchive.conf *.tmp
 	${RM} -r archivedir
 
 clobber: clean
